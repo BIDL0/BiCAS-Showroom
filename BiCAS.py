@@ -71,8 +71,8 @@ class CA:
         self.cols = cols
         self.states = states
         self.nsize = nsize
-        self.cell_w = pygame.display.Info().current_w / self.cols
-        self.cell_h = pygame.display.Info().current_h / self.rows
+        self.cell_w = int(pygame.display.Info().current_w / self.cols)
+        self.cell_h = int(pygame.display.Info().current_h / self.rows)
         self.hy = 0
 
     def set_cell(self, row, col, state):
@@ -82,7 +82,8 @@ class CA:
     def get_cell(self, row, col):
         return int(self.cell[row][col])
 
-    def set_clicked_cell(self, (pos_x, pos_y)):
+    def set_clicked_cell(self, xxx_todo_changeme):
+        (pos_x, pos_y) = xxx_todo_changeme
         row = pos_y / self.cell_h + 1
         col = pos_x / self.cell_w + 1
         temp = (self.get_cell(row, col) + 1) % self.states
@@ -182,7 +183,7 @@ class CA:
             self.temp[row][col] = self.ltf_dict.get(key, self.cell[row][col])
 
         else:
-            print "Unsupported neighbourhood:", self.nsize
+            print("Unsupported neighbourhood:", self.nsize)
             exit(1)
 
     def read_state(self, sfile):
@@ -190,8 +191,8 @@ class CA:
         for line in sfile.readlines():
             istate.append(line.strip().split(' '))
         sfile.close()
-        roff = (self.rows - len(istate)) / 2
-        coff = (self.cols - len(istate[0])) / 2
+        roff = int((self.rows - len(istate)) / 2)
+        coff = int((self.cols - len(istate[0])) / 2)
         for r in range(0, len(istate)):
             for s in range(0, len(istate[0])):
                 self.istt[r+roff+1][s+coff+1] = istate[r][s]
@@ -201,7 +202,7 @@ class CA:
         try:
             caf = open("default.cas", "r")
         except IOError:
-            print "CA state file not specified, the default cell state is 0."
+            print("CA state file not specified, the default cell state is 0.")
             return
         with caf:
             self.read_state(caf)
@@ -210,7 +211,7 @@ class CA:
         try:
             caf = open(file_name, "r")
         except IOError:
-            print "Unable to open the CA state file:", file_name
+            print("Unable to open the CA state file:", file_name)
             self.state_file_default()
             return
         with caf:
@@ -221,20 +222,20 @@ class CA:
         try:
             caf = open(file_name, "r")
         except IOError:
-            print "Unable to open the transition function file:", file_name
+            print("Unable to open the transition function file:", file_name)
             exit(1)
         with caf:
             for line in caf:
                 line = line.strip().split(' ')
                 if row == 0: # the first row (head) contains #-of-states only
                     if len(line) != 1:  # if it doesn't, report error
-                        print "The transition function file head must contain \
-only the number of CA states!"
+                        print("The transition function file head must contain \
+only the number of CA states!")
                         exit(1)
                     self.states = int(line[0])
                     if self.states > len(color):
-                        print "Too many CA states: %d (the maximum is %d)" % \
-                            (self.states, len(color))
+                        print("Too many CA states: %d (the maximum is %d)" % \
+                            (self.states, len(color)))
                         exit(1)
                 elif line[0] != "#": # reading the transition rules (rows)
                     # if they are not commented out by #
@@ -242,16 +243,16 @@ only the number of CA states!"
                     left = ''
                     self.nsize = len(line)
                     if self.nsize != 5 and self.nsize != 9:
-                        print "Unsupported neighbourhood:", self.nsize
+                        print("Unsupported neighbourhood:", self.nsize)
                         exit(1)
                     for i in range(self.nsize):
                         left = left + "%02d" % int(line[i])
                     self.ltf_dict[left] = right
                 row = row + 1
             caf.close()
-        print "The number of states:", self.states
-        print "Cellular neighbourhood:", self.nsize
-        print "Transition rules read:", row-1 # -1 for not counting the head
+        print("The number of states:", self.states)
+        print("Cellular neighbourhood:", self.nsize)
+        print("Transition rules read:", row-1) # -1 for not counting the head
         pygame.display.set_caption(file_name)
 
     def read_tab_files(self):
@@ -308,7 +309,7 @@ def main_loop(ca, win):
                 elif keyb == pygame.K_t:
                     if devel == 0:
                         ca.develop(win)
-                    print "step %d" % ca.age
+                    print("step %d" % ca.age)
                 elif keyb == pygame.K_i:
                     ca.istt_init()
                     ca.draw(win)
@@ -366,29 +367,29 @@ def run_parser():
         if sys.argv[i].isdigit():
             new_size = int(sys.argv[i])
             if new_size > 0:
-                print "The CA size specified:", new_size
+                print("The CA size specified:", new_size)
                 size = new_size
             else:
-                print "The default CA size is:", size, "x", size
+                print("The default CA size is:", size, "x", size)
             i = i + 1
 
     ca = CA(size, size)
 
     if i < runl:
         if sys.argv[i].endswith("tab"):
-            print "Reading a transition function file:", sys.argv[i]
+            print("Reading a transition function file:", sys.argv[i])
             ca.read_ca(sys.argv[i])
             ltf = True
         elif sys.argv[i].endswith("cas"):
-            print "Initial state file specified:", sys.argv[i]
+            print("Initial state file specified:", sys.argv[i])
             ca.state_file_custom(sys.argv[i])
             state = True
         else:
-            print "WARNING, unknown argument:", sys.argv[i]
+            print("WARNING, unknown argument:", sys.argv[i])
         i = i + 1
 
     if i < runl and not state and sys.argv[i].endswith("cas"):
-        print "Initial state file specified:", sys.argv[i]
+        print("Initial state file specified:", sys.argv[i])
         ca.state_file_custom(sys.argv[i])
         state = True
         i = i + 1
@@ -396,15 +397,15 @@ def run_parser():
     if i < runl and state and ltf and sys.argv[i].isdigit():
         # well, you have specified the delay...
         ca.delay_ms = int(sys.argv[i])
-        print "Development delay:", ca.delay_ms, "ms"
+        print("Development delay:", ca.delay_ms, "ms")
         i = i + 1
 
     if i < runl:
-        print "Ignoring remaining arguments:",
+        print("Ignoring remaining arguments:", end=' ')
         while i < runl:
-            print sys.argv[i],
+            print(sys.argv[i], end=' ')
             i = i + 1
-        print
+        print()
 
     if not state:
         ca.state_file_default()
@@ -414,11 +415,11 @@ def run_parser():
     return ca
 
 def usage():
-    print "Usage:"
-    print "-----------------------------------------------------------"
-    print "BiCAS.py [integer_ca_size] [ltf_file.tab] [istate_file.cas]"
-    print "! The arguments are optional but their order is important !"
-    print "-----------------------------------------------------------"
+    print("Usage:")
+    print("-----------------------------------------------------------")
+    print("BiCAS.py [integer_ca_size] [ltf_file.tab] [istate_file.cas]")
+    print("! The arguments are optional but their order is important !")
+    print("-----------------------------------------------------------")
 
 def main():
     global _WIN
